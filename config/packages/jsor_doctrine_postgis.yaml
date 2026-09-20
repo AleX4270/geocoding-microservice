@@ -1,0 +1,22 @@
+services:
+    Jsor\Doctrine\PostGIS\Event\ORMSchemaEventSubscriber:
+        tags: [{ name: doctrine.event_subscriber, connection: default }]
+
+    Jsor\Doctrine\PostGIS\Event\ORMSchemaEventListener:
+        tags: [{ name: doctrine.event_listener, event: postGenerateSchemaTable, connection: default }]
+
+    Jsor\Doctrine\PostGIS\Driver\Middleware:
+        tags: [ doctrine.middleware ]
+
+doctrine:
+    dbal:
+        mapping_types:
+            _text: string
+        types:
+            geography: 'Jsor\Doctrine\PostGIS\Types\GeographyType'
+            geometry: 'Jsor\Doctrine\PostGIS\Types\GeometryType'
+    orm:
+        dql:
+            string_functions:
+                ST_AsGeoJSON: 'Jsor\Doctrine\PostGIS\Functions\ST_AsGeoJSON'
+                ST_GeomFromGeoJSON: 'Jsor\Doctrine\PostGIS\Functions\ST_GeomFromGeoJSON'
