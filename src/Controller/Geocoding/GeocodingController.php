@@ -10,17 +10,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class GeocodingController extends AbstractController {
+final class GeocodingController extends AbstractController
+{
     public function __construct(
         private readonly GeocodingService $service,
-    ) {}
+    ) {
+    }
 
     #[Route('/geocoding', methods: 'GET')]
-    public function index(#[MapQueryString()] GeocodingRequestDto $params): ApiJsonResponse {
+    public function index(#[MapQueryString()] GeocodingRequestDto $params): ApiJsonResponse
+    {
         return new ApiJsonResponse(
             data: $this->service->geocode($params),
             status: HttpStatus::OK,
-            message: "Success",
+            message: 'Success',
         );
     }
 }

@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Dto\Request\Geocoding;
 
 use Symfony\Component\Validator\Constraints;
 
-final class GeocodingRequestDto {
+final class GeocodingRequestDto
+{
     #[Constraints\NotBlank]
     public string $street;
 
@@ -17,7 +19,8 @@ final class GeocodingRequestDto {
 
     public ?string $postalCode = null;
 
-    public function toArray(): array {
+    public function toArray(): array
+    {
         return [
             'street' => $this->street,
             'city' => $this->city,

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Response;
@@ -6,7 +7,8 @@ namespace App\Response;
 use App\Enum\HttpStatus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-final class ApiJsonResponse extends JsonResponse {
+final class ApiJsonResponse extends JsonResponse
+{
     public function __construct(
         mixed $data = null,
         HttpStatus $status = HttpStatus::OK,
