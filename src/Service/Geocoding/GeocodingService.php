@@ -5,7 +5,15 @@ declare(strict_types=1);
 namespace App\Service\Geocoding;
 
 use App\Dto\Request\Geocoding\GeocodingRequestDto;
+use App\Entity\Address;
+use App\Entity\City;
 use App\Entity\Country;
+use App\Entity\Province;
+use App\Exception\Geocoding\CoordinatesNotFoundException;
+use App\Repository\AddressRepository;
+use App\Repository\CityRepository;
+use App\Repository\CountryRepository;
+use App\Repository\ProvinceRepository;
 use App\ValueObject\Coordinates;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -17,13 +25,29 @@ final class GeocodingService
         #[Autowire(env: 'NOMINATIM_API_URL')]
         private readonly string $nominatimApiUrl,
         private readonly HttpClientInterface $httpClient,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly AddressRepository $addressRepository,
+        private readonly CountryRepository $countryRepository,
+        private readonly ProvinceRepository $provinceRepository,
+        private readonly CityRepository $cityRepository,
     ) {
     }
 
     public function geocode(GeocodingRequestDto $dto): Coordinates
     {
         // TODO: Check if the result is already in the database
+        $address = $this->addressRepository->findByAllParameters([
+            'address' => $dto->street,
+            'city' => $dto->city,
+            'country' => $dto->countrySymbol,
+            'postalCode' => $dto->postalCode,
+        ]);
+
         // TODO: Move the nominatim geocoding to the external service
+
+        if (!empty($address)) {
+            return $address->getCoordinates();
+        }
 
         $baseUrl = $this->nominatimApiUrl;
         $queryParams = [
@@ -44,15 +68,49 @@ final class GeocodingService
             'query' => $queryParams,
         ]);
 
-        $data = $response->toArray();
+        $data = [];
 
         if (empty($data) || empty($data[0])) {
-            throw new \Exception('Error no data!');
-            // TODO: Implement custom errors with error handling
-            // throw new CoordinatesNotFoundException('Geocoding result data empty');
+            throw new CoordinatesNotFoundException();
         }
 
         // TODO: Save result to the database
+        $country = $this->countryRepository->findOneBy(['symbol' => $dto->countrySymbol]);
+        if (empty($country)) {
+            $country = new Country();
+            $country->setSymbol($dto->countrySymbol);
+            $this->entityManager->persist($country);
+        }
+
+        $province = $this->provinceRepository->findOneBy(['name' => $dto->province]);
+        if (empty($province)) {
+            $province = new Province();
+            $province->setName($dto->province);
+            $province->setCountry($country);
+            $this->entityManager->persist($province);
+        }
+
+        $city = $this->cityRepository->findOneBy(['name' => $dto->city]);
+        if (empty($city)) {
+            $city = new City();
+            $city->setName($dto->city);
+            $city->setProvince($province);
+            $this->entityManager->persist($city);
+        }
+
+        $address = $this->addressRepository->findOneBy(['address' => $dto->street]);
+        if (empty($address)) {
+            $address = new Address();
+            $address->setAddress($dto->street);
+            $address->setCity($city);
+            $address->setCoordinates(new Coordinates(
+                latitude: (float) $data[0]['lat'],
+                longitude: (float) $data[0]['lon'],
+            ));
+            $this->entityManager->persist($address);
+        }
+
+        $this->entityManager->flush();
 
         return new Coordinates(
             latitude: (float) $data[0]['lat'],

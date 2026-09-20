@@ -16,6 +16,22 @@ class AddressRepository extends ServiceEntityRepository
         parent::__construct($registry, Address::class);
     }
 
+    public function findByAllParameters(array $params): ?Address
+    {
+        return $this->createQueryBuilder('a')
+            ->join('a.city', 'c')
+            ->join('c.province', 'p')
+            ->join('p.country', 'co')
+            ->where('a.address = :address')
+            ->setParameter('address', $params['address'])
+            ->andWhere('c.name = :city')
+            ->setParameter('city', $params['city'])
+            ->andWhere('co.symbol = :country')
+            ->setParameter('country', $params['country'])
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Address[] Returns an array of Address objects
     //     */

@@ -15,6 +15,9 @@ final class GeocodingRequestDto
     public string $city;
 
     #[Constraints\NotBlank]
+    public string $province;
+
+    #[Constraints\NotBlank]
     public string $countrySymbol;
 
     public ?string $postalCode = null;
@@ -24,6 +27,7 @@ final class GeocodingRequestDto
         return [
             'street' => $this->street,
             'city' => $this->city,
+            'province' => $this->province,
             'countrySymbol' => $this->countrySymbol,
             'postalCode' => $this->postalCode,
         ];
