@@ -13,7 +13,7 @@ doctrine:
         mapping_types:
             _text: string
         types:
-            geography: 'Jsor\Doctrine\PostGIS\Types\GeographyType'
+            geography: 'App\Types\CoordinatesType'
             geometry: 'Jsor\Doctrine\PostGIS\Types\GeometryType'
     orm:
         dql:
