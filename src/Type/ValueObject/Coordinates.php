@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ValueObject;
+namespace App\Type\ValueObject;
 
 final readonly class Coordinates
 {

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Types;
+namespace App\Type\Doctrine;
 
-use App\ValueObject\Coordinates;
+use App\Type\ValueObject\Coordinates;
 use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use Jsor\Doctrine\PostGIS\Types\GeographyType;

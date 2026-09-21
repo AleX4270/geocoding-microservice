@@ -16,7 +16,7 @@ use App\Repository\CityRepository;
 use App\Repository\CountryRepository;
 use App\Repository\ProvinceRepository;
 use App\Type\PostalAddress;
-use App\ValueObject\Coordinates;
+use App\Type\ValueObject\Coordinates;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;

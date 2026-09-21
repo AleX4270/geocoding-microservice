@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\AddressRepository;
+use App\Type\ValueObject\Coordinates;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
@@ -24,7 +25,7 @@ class Address
     private ?City $city = null;
 
     #[ORM\Column(type: 'geography', options: ['geometry_type' => 'POINT', 'srid' => 4326])]
-    private mixed $coordinates = null;
+    private Coordinates $coordinates;
 
     public function getId(): ?int
     {
@@ -67,12 +68,12 @@ class Address
         return $this;
     }
 
-    public function getCoordinates(): mixed
+    public function getCoordinates(): Coordinates
     {
         return $this->coordinates;
     }
 
-    public function setCoordinates(mixed $coordinates): static
+    public function setCoordinates(Coordinates $coordinates): static
     {
         $this->coordinates = $coordinates;
 
