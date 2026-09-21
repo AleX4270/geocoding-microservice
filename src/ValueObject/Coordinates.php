@@ -11,4 +11,6 @@ final readonly class Coordinates
         public float $longitude,
     ) {
     }
+
+    // TODO: Add validation and equals
 }

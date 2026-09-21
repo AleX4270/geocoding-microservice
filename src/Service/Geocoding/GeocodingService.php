@@ -9,6 +9,7 @@ use App\Entity\Address;
 use App\Entity\City;
 use App\Entity\Country;
 use App\Entity\Province;
+use App\Enum\NominatimEndpoint;
 use App\Exception\Geocoding\CoordinatesNotFoundException;
 use App\Repository\AddressRepository;
 use App\Repository\CityRepository;
@@ -49,7 +50,7 @@ final class GeocodingService
             return $address->getCoordinates();
         }
 
-        $baseUrl = $this->nominatimApiUrl;
+        $baseUrl = $this->nominatimApiUrl . NominatimEndpoint::GEOCODE->value;
         $queryParams = [
             'street' => $dto->street,
             'city' => $dto->city,
@@ -68,7 +69,7 @@ final class GeocodingService
             'query' => $queryParams,
         ]);
 
-        $data = [];
+        $data = $response->toArray();
 
         if (empty($data) || empty($data[0])) {
             throw new CoordinatesNotFoundException();

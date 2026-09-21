@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Controller\Geocoding;
 
@@ -23,7 +24,7 @@ final class GeocodingController extends AbstractController
         return new ApiJsonResponse(
             data: $this->service->geocode($params),
             status: HttpStatus::OK,
-            message: 'Success',
+            message: 'Success', //TODO: i18n
         );
     }
 }
