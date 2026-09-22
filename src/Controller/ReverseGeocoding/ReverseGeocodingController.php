@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\ReverseGeocoding;
@@ -24,7 +25,7 @@ final class ReverseGeocodingController extends AbstractController
         return new ApiJsonResponse(
             data: $this->service->reverseGeocode($params),
             status: HttpStatus::OK,
-            message: 'Success', //TODO: i18n
+            message: 'Success', // TODO: i18n
         );
     }
 }

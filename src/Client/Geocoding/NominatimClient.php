@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Client\Geocoding;
@@ -14,15 +15,18 @@ use App\Type\ValueObject\Coordinates;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class NominatimClient implements GeocodingClientInterface {
+final class NominatimClient implements GeocodingClientInterface
+{
     public function __construct(
         #[Autowire(env: 'NOMINATIM_API_URL')]
         private readonly string $nominatimApiUrl,
         private readonly HttpClientInterface $httpClient,
-    ) {}
+    ) {
+    }
 
-    public function geocode(GeocodingRequestDto $dto): Coordinates {
-        $baseUrl = $this->nominatimApiUrl . NominatimEndpoint::GEOCODE->value;
+    public function geocode(GeocodingRequestDto $dto): Coordinates
+    {
+        $baseUrl = $this->nominatimApiUrl.NominatimEndpoint::GEOCODE->value;
         $queryParams = [
             'street' => $dto->street,
             'city' => $dto->city,
@@ -53,8 +57,9 @@ final class NominatimClient implements GeocodingClientInterface {
         );
     }
 
-    public function reverseGeocode(ReverseGeocodingRequestDto $dto): PostalAddress {
-        $baseUrl = $this->nominatimApiUrl . NominatimEndpoint::REVERSE_GEOCODE->value;
+    public function reverseGeocode(ReverseGeocodingRequestDto $dto): PostalAddress
+    {
+        $baseUrl = $this->nominatimApiUrl.NominatimEndpoint::REVERSE_GEOCODE->value;
         $queryParams = [
             'lat' => $dto->latitude,
             'lon' => $dto->longitude,
@@ -76,8 +81,9 @@ final class NominatimClient implements GeocodingClientInterface {
         }
 
         $address = $data['address'];
+
         return new PostalAddress(
-            street: trim(($address['road'] ?? '') . ' ' . ($address['house_number'] ?? '')),
+            street: trim(($address['road'] ?? '').' '.($address['house_number'] ?? '')),
             city: $address['city'] ?? $address['town'] ?? $address['village'] ?? $address['municipality'] ?? '',
             province: preg_replace('/^województwo\s+/iu', '', $address['state'] ?? $address['region'] ?? $address['county'] ?? ''),
             countrySymbol: strtoupper($address['country_code'] ?? ''),
