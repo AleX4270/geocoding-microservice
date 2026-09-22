@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Address;
+use App\Type\ValueObject\Coordinates;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,6 +20,7 @@ class AddressRepository extends ServiceEntityRepository
     public function findByAllParameters(array $params): ?Address
     {
         return $this->createQueryBuilder('a')
+            ->addSelect('c', 'p', 'co')
             ->join('a.city', 'c')
             ->join('c.province', 'p')
             ->join('p.country', 'co')
@@ -32,28 +34,16 @@ class AddressRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    //    /**
-    //     * @return Address[] Returns an array of Address objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Address
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findByCoordinates(Coordinates $coordinates): ?Address
+    {
+        return $this->createQueryBuilder('a')
+            ->addSelect('c', 'p', 'co')
+            ->join('a.city', 'c')
+            ->join('c.province', 'p')
+            ->join('p.country', 'co')
+            ->where('a.coordinates = :point')
+            ->setParameter('point', $coordinates, 'geography')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

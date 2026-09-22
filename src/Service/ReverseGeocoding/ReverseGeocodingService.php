@@ -37,25 +37,32 @@ final class ReverseGeocodingService
 
     public function reverseGeocode(ReverseGeocodingRequestDto $dto): PostalAddress
     {
-        // // TODO: Check if the result is already in the database
-        // $address = $this->addressRepository->findByAllParameters([
-        //     'address' => $dto->street,
-        //     'city' => $dto->city,
-        //     'country' => $dto->countrySymbol,
-        //     'postalCode' => $dto->postalCode,
-        // ]);
+        $requestedCoordinates = new Coordinates(
+            $dto->latitude,
+            $dto->longitude,
+        );
 
-        // // TODO: Move the nominatim geocoding to the external service
+        // TODO: Check if the result is already in the database
+        $address = $this->addressRepository->findByCoordinates($requestedCoordinates);
 
-        // if (!empty($address)) {
-        //     return $address->getCoordinates();
-        // }
+        // TODO: Move the nominatim geocoding to the external service
+
+        if (!empty($address)) {
+            return new PostalAddress(
+                street: $address->getAddress(),
+                city: $address->getCity()->getName(),
+                province: $address->getCity()->getProvince()->getName(),
+                countrySymbol: $address->getCity()->getProvince()->getCountry()->getSymbol(),
+                postalCode: 'db!',
+            );
+        }
 
         $baseUrl = $this->nominatimApiUrl . NominatimEndpoint::REVERSE_GEOCODE->value;
         $queryParams = [
             'lat' => $dto->latitude,
             'lon' => $dto->longitude,
             'format' => 'json',
+            'accept-language' => 'pl',
         ];
 
         $response = $this->httpClient->request('GET', $baseUrl, [
@@ -71,51 +78,52 @@ final class ReverseGeocodingService
             throw new AddressNotFoundException();
         }
 
-        // TODO: 1. Map the data to PostalAddress type, create nominatim client class and interface
+        // TODO: create nominatim client class and interface
 
-        // return $data;
+        $address = $data['address'] ?? [];
+        $postalAddress = new PostalAddress(
+            street: trim(($address['road'] ?? '') . ' ' . ($address['house_number'] ?? '')),
+            city: $address['city'] ?? $address['town'] ?? $address['village'] ?? $address['municipality'] ?? '',
+            province: preg_replace('/^województwo\s+/iu', '', $address['state'] ?? $address['region'] ?? $address['county'] ?? ''),
+            countrySymbol: strtoupper($address['country_code'] ?? ''),
+            postalCode: $address['postcode'] ?? '',
+        );
 
-        // // TODO: Save result to the database
-        // $country = $this->countryRepository->findOneBy(['symbol' => $dto->countrySymbol]);
-        // if (empty($country)) {
-        //     $country = new Country();
-        //     $country->setSymbol($dto->countrySymbol);
-        //     $this->entityManager->persist($country);
-        // }
+        // TODO: Save result to the database
+        $country = $this->countryRepository->findOneBy(['symbol' => $postalAddress->countrySymbol]);
+        if (empty($country)) {
+            $country = new Country();
+            $country->setSymbol($postalAddress->countrySymbol);
+            $this->entityManager->persist($country);
+        }
 
-        // $province = $this->provinceRepository->findOneBy(['name' => $dto->province]);
-        // if (empty($province)) {
-        //     $province = new Province();
-        //     $province->setName($dto->province);
-        //     $province->setCountry($country);
-        //     $this->entityManager->persist($province);
-        // }
+        $province = $this->provinceRepository->findOneBy(['name' => $postalAddress->province]);
+        if (empty($province)) {
+            $province = new Province();
+            $province->setName($postalAddress->province);
+            $province->setCountry($country);
+            $this->entityManager->persist($province);
+        }
 
-        // $city = $this->cityRepository->findOneBy(['name' => $dto->city]);
-        // if (empty($city)) {
-        //     $city = new City();
-        //     $city->setName($dto->city);
-        //     $city->setProvince($province);
-        //     $this->entityManager->persist($city);
-        // }
+        $city = $this->cityRepository->findOneBy(['name' => $postalAddress->city]);
+        if (empty($city)) {
+            $city = new City();
+            $city->setName($postalAddress->city);
+            $city->setProvince($province);
+            $this->entityManager->persist($city);
+        }
 
-        // $address = $this->addressRepository->findOneBy(['address' => $dto->street]);
-        // if (empty($address)) {
-        //     $address = new Address();
-        //     $address->setAddress($dto->street);
-        //     $address->setCity($city);
-        //     $address->setCoordinates(new Coordinates(
-        //         latitude: (float) $data[0]['lat'],
-        //         longitude: (float) $data[0]['lon'],
-        //     ));
-        //     $this->entityManager->persist($address);
-        // }
+        $address = $this->addressRepository->findOneBy(['address' => $postalAddress->street]);
+        if (empty($address)) {
+            $address = new Address();
+            $address->setAddress($postalAddress->street);
+            $address->setCity($city);
+            $address->setCoordinates($requestedCoordinates);
+            $this->entityManager->persist($address);
+        }
 
-        // $this->entityManager->flush();
+        $this->entityManager->flush();
 
-        // return new Coordinates(
-        //     latitude: (float) $data[0]['lat'],
-        //     longitude: (float) $data[0]['lon'],
-        // );
+        return $postalAddress;
     }
 }
