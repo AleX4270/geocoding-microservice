@@ -30,6 +30,7 @@ class AddressRepository extends ServiceEntityRepository
             ->setParameter('city', $params['city'])
             ->andWhere('co.symbol = :country')
             ->setParameter('country', $params['country'])
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }
@@ -43,6 +44,7 @@ class AddressRepository extends ServiceEntityRepository
             ->join('p.country', 'co')
             ->where('a.coordinates = :point')
             ->setParameter('point', $coordinates, 'geography')
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }

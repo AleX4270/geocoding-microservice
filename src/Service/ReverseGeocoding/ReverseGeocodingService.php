@@ -9,8 +9,7 @@ use App\Entity\Address;
 use App\Entity\City;
 use App\Entity\Country;
 use App\Entity\Province;
-use App\Enum\NominatimEndpoint;
-use App\Exception\ReverseGeocoding\AddressNotFoundException;
+use App\Interface\GeocodingClientInterface;
 use App\Repository\AddressRepository;
 use App\Repository\CityRepository;
 use App\Repository\CountryRepository;
@@ -32,6 +31,7 @@ final class ReverseGeocodingService
         private readonly CountryRepository $countryRepository,
         private readonly ProvinceRepository $provinceRepository,
         private readonly CityRepository $cityRepository,
+        private readonly GeocodingClientInterface $geocodingClient,
     ) {
     }
 
@@ -42,10 +42,7 @@ final class ReverseGeocodingService
             $dto->longitude,
         );
 
-        // TODO: Check if the result is already in the database
         $address = $this->addressRepository->findByCoordinates($requestedCoordinates);
-
-        // TODO: Move the nominatim geocoding to the external service
 
         if (!empty($address)) {
             return new PostalAddress(
@@ -57,39 +54,9 @@ final class ReverseGeocodingService
             );
         }
 
-        $baseUrl = $this->nominatimApiUrl . NominatimEndpoint::REVERSE_GEOCODE->value;
-        $queryParams = [
-            'lat' => $dto->latitude,
-            'lon' => $dto->longitude,
-            'format' => 'json',
-            'accept-language' => 'pl',
-        ];
+        $postalAddress = $this->geocodingClient->reverseGeocode($dto);
 
-        $response = $this->httpClient->request('GET', $baseUrl, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-            ],
-            'query' => $queryParams,
-        ]);
-
-        $data = $response->toArray();
-
-        if (empty($data)) {
-            throw new AddressNotFoundException();
-        }
-
-        // TODO: create nominatim client class and interface
-
-        $address = $data['address'] ?? [];
-        $postalAddress = new PostalAddress(
-            street: trim(($address['road'] ?? '') . ' ' . ($address['house_number'] ?? '')),
-            city: $address['city'] ?? $address['town'] ?? $address['village'] ?? $address['municipality'] ?? '',
-            province: preg_replace('/^województwo\s+/iu', '', $address['state'] ?? $address['region'] ?? $address['county'] ?? ''),
-            countrySymbol: strtoupper($address['country_code'] ?? ''),
-            postalCode: $address['postcode'] ?? '',
-        );
-
-        // TODO: Save result to the database
+        //TODO:  Do not save results with empty data
         $country = $this->countryRepository->findOneBy(['symbol' => $postalAddress->countrySymbol]);
         if (empty($country)) {
             $country = new Country();

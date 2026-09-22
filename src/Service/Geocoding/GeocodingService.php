@@ -9,8 +9,7 @@ use App\Entity\Address;
 use App\Entity\City;
 use App\Entity\Country;
 use App\Entity\Province;
-use App\Enum\NominatimEndpoint;
-use App\Exception\Geocoding\CoordinatesNotFoundException;
+use App\Interface\GeocodingClientInterface;
 use App\Repository\AddressRepository;
 use App\Repository\CityRepository;
 use App\Repository\CountryRepository;
@@ -31,12 +30,12 @@ final class GeocodingService
         private readonly CountryRepository $countryRepository,
         private readonly ProvinceRepository $provinceRepository,
         private readonly CityRepository $cityRepository,
+        private readonly GeocodingClientInterface $geocodingClient,
     ) {
     }
 
     public function geocode(GeocodingRequestDto $dto): Coordinates
     {
-        // TODO: Check if the result is already in the database
         $address = $this->addressRepository->findByAllParameters([
             'address' => $dto->street,
             'city' => $dto->city,
@@ -44,38 +43,13 @@ final class GeocodingService
             'postalCode' => $dto->postalCode,
         ]);
 
-        // TODO: Move the nominatim geocoding to the external service
-
         if (!empty($address)) {
             return $address->getCoordinates();
         }
 
-        $baseUrl = $this->nominatimApiUrl . NominatimEndpoint::GEOCODE->value;
-        $queryParams = [
-            'street' => $dto->street,
-            'city' => $dto->city,
-            'country' => $dto->countrySymbol,
-            'format' => 'json',
-        ];
+        $coordinates = $this->geocodingClient->geocode($dto);
 
-        if (!empty($dto->postalCode)) {
-            $queryParams['postalcode'] = $dto->postalCode;
-        }
-
-        $response = $this->httpClient->request('GET', $baseUrl, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-            ],
-            'query' => $queryParams,
-        ]);
-
-        $data = $response->toArray();
-
-        if (empty($data) || empty($data[0])) {
-            throw new CoordinatesNotFoundException();
-        }
-
-        // TODO: Save result to the database
+        //TODO:  Do not save results with empty data
         $country = $this->countryRepository->findOneBy(['symbol' => $dto->countrySymbol]);
         if (empty($country)) {
             $country = new Country();
@@ -104,18 +78,12 @@ final class GeocodingService
             $address = new Address();
             $address->setAddress($dto->street);
             $address->setCity($city);
-            $address->setCoordinates(new Coordinates(
-                latitude: (float) $data[0]['lat'],
-                longitude: (float) $data[0]['lon'],
-            ));
+            $address->setCoordinates($coordinates);
             $this->entityManager->persist($address);
         }
 
         $this->entityManager->flush();
 
-        return new Coordinates(
-            latitude: (float) $data[0]['lat'],
-            longitude: (float) $data[0]['lon'],
-        );
+        return $coordinates;
     }
 }
