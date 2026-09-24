@@ -5,3 +5,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY docker/database/initdb-postgis.sh /docker-entrypoint-initdb.d/01-postgis.sh
+COPY docker/database/initdb-test-database.sh /docker-entrypoint-initdb.d/02-init-test-database.sh
