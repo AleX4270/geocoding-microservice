@@ -25,7 +25,7 @@ final class GeocodingController extends AbstractController
         return new ApiJsonResponse(
             data: $this->service->geocode($params),
             status: HttpStatus::OK,
-            message: 'Success', // TODO: i18n
+            message: 'Success',
         );
     }
 }

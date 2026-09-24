@@ -25,7 +25,7 @@ final class ReverseGeocodingController extends AbstractController
         return new ApiJsonResponse(
             data: $this->service->reverseGeocode($params),
             status: HttpStatus::OK,
-            message: 'Success', // TODO: i18n
+            message: 'Success',
         );
     }
 }
