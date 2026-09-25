@@ -34,41 +34,45 @@ final class AddressService
             throw new ValidationFailedException($dto, $errors);
         }
 
-        $country = $this->countryRepository->findOneBy(['symbol' => $dto->countrySymbol]);
-        if (empty($country)) {
-            $country = new Country();
-            $country->setSymbol($dto->countrySymbol);
-            $this->entityManager->persist($country);
-        }
+        return $this->entityManager->wrapInTransaction(function() use ($dto): Address {
+            $country = $this->countryRepository->findOneBy(['symbol' => $dto->countrySymbol]);
+            if (empty($country)) {
+                $country = new Country();
+                $country->setSymbol($dto->countrySymbol);
+                $this->entityManager->persist($country);
+            }
 
-        $province = $this->provinceRepository->findOneBy(['name' => $dto->province]);
-        if (empty($province)) {
-            $province = new Province();
-            $province->setName(strtolower($dto->province));
-            $province->setCountry($country);
-            $this->entityManager->persist($province);
-        }
+            $province = $this->provinceRepository->findOneBy(['name' => $dto->province]);
+            if (empty($province)) {
+                $province = new Province();
+                $province->setName($dto->province);
+                $province->setCountry($country);
+                $this->entityManager->persist($province);
+                $this->entityManager->flush();
+            }
 
-        $city = $this->cityRepository->findOneBy(['name' => $dto->city]);
-        if (empty($city)) {
-            $city = new City();
-            $city->setName($dto->city);
-            $city->setProvince($province);
-            $this->entityManager->persist($city);
-        }
+            $city = $this->cityRepository->findOneBy(['name' => $dto->city, 'province' => $province]);
+            if (empty($city)) {
+                $city = new City();
+                $city->setName($dto->city);
+                $city->setProvince($province);
+                $this->entityManager->persist($city);
+                $this->entityManager->flush();
+            }
 
-        $address = $this->addressRepository->findOneBy(['address' => $dto->address]);
-        if (empty($address)) {
-            $address = new Address();
-            $address->setAddress($dto->address);
-            $address->setPostalCode($dto->postalCode);
-            $address->setCity($city);
-            $address->setCoordinates($dto->coordinates);
-            $this->entityManager->persist($address);
-        }
+            $address = $this->addressRepository->findOneBy(['address' => $dto->address, 'city' => $city]);
+            if (empty($address)) {
+                $address = new Address();
+                $address->setAddress($dto->address);
+                $address->setPostalCode($dto->postalCode);
+                $address->setCity($city);
+                $address->setCoordinates($dto->coordinates);
+                $this->entityManager->persist($address);
+            }
 
-        $this->entityManager->flush();
+            $this->entityManager->flush();
 
-        return $address;
-    }    
+            return $address;
+        });
+    }
 }
