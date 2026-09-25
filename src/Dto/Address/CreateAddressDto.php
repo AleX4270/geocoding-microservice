@@ -9,17 +9,21 @@ use Symfony\Component\Validator\Constraints;
 
 final readonly class CreateAddressDto
 {
+    #[Constraints\NotBlank]
+    public string $province;
+
     public function __construct(
         #[Constraints\NotBlank]
         public string $address,
         #[Constraints\NotBlank]
         public string $city,
         #[Constraints\NotBlank]
-        public string $province,
+        string $province,
         #[Constraints\NotBlank]
         public string $countrySymbol,
         public Coordinates $coordinates,
         public ?string $postalCode = null,
     ) {
+        $this->province = mb_strtolower($province);
     }
 }
