@@ -20,7 +20,7 @@ final class ReverseGeocodingController extends AbstractController
     }
 
     #[Route('/reverse-geocoding', methods: 'GET')]
-    public function index(#[MapQueryString()] ReverseGeocodingRequestDto $params): ApiJsonResponse
+    public function index(#[MapQueryString(validationFailedStatusCode: HttpStatus::UNPROCESSABLE_ENTITY->value)] ReverseGeocodingRequestDto $params): ApiJsonResponse
     {
         return new ApiJsonResponse(
             data: $this->service->reverseGeocode($params),

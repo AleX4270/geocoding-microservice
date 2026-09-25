@@ -20,7 +20,7 @@ final class GeocodingController extends AbstractController
     }
 
     #[Route('/geocoding', methods: 'GET')]
-    public function index(#[MapQueryString()] GeocodingRequestDto $params): ApiJsonResponse
+    public function index(#[MapQueryString(validationFailedStatusCode: HttpStatus::UNPROCESSABLE_ENTITY->value)] GeocodingRequestDto $params): ApiJsonResponse
     {
         return new ApiJsonResponse(
             data: $this->service->geocode($params),
