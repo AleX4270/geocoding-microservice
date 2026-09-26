@@ -42,7 +42,7 @@ final class AddressService
                 $this->entityManager->persist($country);
             }
 
-            $province = $this->provinceRepository->findOneBy(['name' => $dto->province]);
+            $province = $this->provinceRepository->findOneBy(['name' => $dto->province, 'country' => $country]);
             if (empty($province)) {
                 $province = new Province();
                 $province->setName($dto->province);
