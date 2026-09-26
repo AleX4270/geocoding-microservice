@@ -8,9 +8,11 @@ use Symfony\Component\Validator\Constraints;
 
 final class ReverseGeocodingRequestDto
 {
+    #[Constraints\NotNull]
     #[Constraints\Range(min: -90, max: 90)]
     public float $latitude;
 
+    #[Constraints\NotNull]
     #[Constraints\Range(min: -180, max: 180)]
     public float $longitude;
 
