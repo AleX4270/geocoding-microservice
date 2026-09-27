@@ -20,3 +20,8 @@ services:
             - "traefik.http.routers.geocoding-microservice.tls=true"
             - "traefik.http.routers.geocoding-microservice.tls.certResolver=le"
             - "traefik.http.services.geocoding-microservice.loadbalancer.server.port=80"
+
+# Internal
+networks:
+    traefik_proxy:
+         external: true
