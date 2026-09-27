@@ -12,7 +12,7 @@ jobs:
             contents: read
 
         env:
-            DB_HOST: 127.0.0.1
+            APP_ENV: test
 
         services:
             postgres:
