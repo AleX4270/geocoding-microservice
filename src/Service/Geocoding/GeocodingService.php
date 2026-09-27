@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Geocoding;
 
 use App\Dto\Address\CreateAddressDto;
+use App\Dto\Address\FindAddressDto;
 use App\Dto\Request\Geocoding\GeocodingRequestDto;
 use App\Interface\GeocodingClientInterface;
 use App\Repository\AddressRepository;
@@ -22,12 +23,12 @@ final class GeocodingService
 
     public function geocode(GeocodingRequestDto $dto): Coordinates
     {
-        $address = $this->addressRepository->findByAllParameters([
-            'address' => $dto->street,
-            'city' => $dto->city,
-            'country' => $dto->countrySymbol,
-            'postalCode' => $dto->postalCode,
-        ]);
+        $address = $this->addressRepository->findByAllParameters(new FindAddressDto(
+            address: $dto->street,
+            city: $dto->city,
+            countrySymbol: $dto->countrySymbol,
+            postalCode: $dto->postalCode,
+        ));
 
         if (!empty($address)) {
             return $address->getCoordinates();
