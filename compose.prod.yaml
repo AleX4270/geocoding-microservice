@@ -1,0 +1,20 @@
+services:
+    database:
+        image: test
+    backend:
+        image: test
+        environment:
+            DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=18&charset=utf8"
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www/html:rw
+            - backend-vendor:/var/www/html/vendor
+        depends_on:
+            - database
+        networks:
+            - geocoding-microservice-network
+        ports:
+            - 80:80
+
+volumes:
+    backend-vendor:

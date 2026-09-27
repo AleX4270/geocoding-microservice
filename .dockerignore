@@ -1,0 +1,33 @@
+# VCS & editors
+.git
+.gitignore
+.editorconfig
+.idea
+.vscode
+.claude
+
+# Local env overrides & secrets (never bake into the image)
+.env.local
+.env.local.php
+.env.*.local
+config/secrets/*/*.decrypt.private.php
+
+# Dependencies and runtime output (built/generated inside the image)
+vendor/
+var/
+public/bundles/
+
+# Tests & tooling
+tests/
+.env.test
+phpunit.dist.xml
+phpunit.xml
+.phpunit.cache/
+.php-cs-fixer.php
+.php-cs-fixer.dist.php
+.php-cs-fixer.cache
+
+# Docker & docs (docker/ stays: the database image COPYs its init scripts from it)
+compose*.yaml
+AGENTS.md
+CLAUDE.md
