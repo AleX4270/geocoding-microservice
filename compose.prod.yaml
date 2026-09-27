@@ -3,8 +3,7 @@ services:
         image: ghcr.io/alex4270/geocoding-microservice-database:latest
     backend:
         image: ghcr.io/alex4270/geocoding-microservice:latest
-        environment:
-            DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=18&charset=utf8"
+        env_file: .env
         restart: unless-stopped
         depends_on:
             - database
