@@ -103,7 +103,7 @@ Missing or invalid parameters (e.g. `latitude=abc` or `latitude=100`) result in 
 
 ## Testing
 
-The ap code base has approximately ~80% test coverage. These tests are a **mandatory job** included in the production deployment workflows.
+The app code base has approximately ~80% test coverage. These tests are a **mandatory job** included in the production deployment workflows.
 
 In order to execute all tests locally, run:
 
