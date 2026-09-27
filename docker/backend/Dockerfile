@@ -41,5 +41,3 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 COPY ./ ./
 
 RUN composer dump-autoload --optimize
-
-CMD ["sh", "-c", "php bin/console cache:clear && php bin/console doctrine:migrations:migrate --no-interaction && apache2-foreground"]
