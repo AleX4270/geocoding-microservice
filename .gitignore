@@ -19,3 +19,10 @@
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+###> os / ide ###
+.DS_Store
+/.idea/
+/.vscode/
+/.claude/settings.local.json
+###< os / ide ###
