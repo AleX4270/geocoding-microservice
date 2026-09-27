@@ -162,7 +162,7 @@ class NominatimClientTest extends TestCase
 
     private function createClient(MockResponse $response): NominatimClient
     {
-        return new NominatimClient(self::BASE_URL, new MockHttpClient($response));
+        return new NominatimClient(new MockHttpClient($response, self::BASE_URL));
     }
 
     private function requestQuery(MockResponse $response): array

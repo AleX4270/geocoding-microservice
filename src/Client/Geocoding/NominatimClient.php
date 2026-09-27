@@ -12,21 +12,17 @@ use App\Exception\ReverseGeocoding\AddressNotFoundException;
 use App\Interface\GeocodingClientInterface;
 use App\Type\PostalAddress;
 use App\Type\ValueObject\Coordinates;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class NominatimClient implements GeocodingClientInterface
 {
     public function __construct(
-        #[Autowire(env: 'NOMINATIM_API_URL')]
-        private readonly string $nominatimApiUrl,
-        private readonly HttpClientInterface $httpClient,
+        private readonly HttpClientInterface $nominatimClient,
     ) {
     }
 
     public function geocode(GeocodingRequestDto $dto): Coordinates
     {
-        $baseUrl = $this->nominatimApiUrl.NominatimEndpoint::GEOCODE->value;
         $queryParams = [
             'street' => $dto->street,
             'city' => $dto->city,
@@ -38,10 +34,7 @@ final class NominatimClient implements GeocodingClientInterface
             $queryParams['postalcode'] = $dto->postalCode;
         }
 
-        $response = $this->httpClient->request('GET', $baseUrl, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-            ],
+        $response = $this->nominatimClient->request('GET', NominatimEndpoint::GEOCODE->value, [
             'query' => $queryParams,
         ]);
 
@@ -59,7 +52,6 @@ final class NominatimClient implements GeocodingClientInterface
 
     public function reverseGeocode(ReverseGeocodingRequestDto $dto): PostalAddress
     {
-        $baseUrl = $this->nominatimApiUrl.NominatimEndpoint::REVERSE_GEOCODE->value;
         $queryParams = [
             'lat' => $dto->latitude,
             'lon' => $dto->longitude,
@@ -67,10 +59,7 @@ final class NominatimClient implements GeocodingClientInterface
             'accept-language' => 'pl',
         ];
 
-        $response = $this->httpClient->request('GET', $baseUrl, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-            ],
+        $response = $this->nominatimClient->request('GET', NominatimEndpoint::REVERSE_GEOCODE->value, [
             'query' => $queryParams,
         ]);
 

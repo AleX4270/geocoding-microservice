@@ -5,6 +5,13 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+    http_client:
+        scoped_clients:
+            nominatim.client:
+                base_uri: '%env(NOMINATIM_API_URL)%'
+                headers:
+                    User-Agent: '%env(NOMINATIM_USER_AGENT)%'
+
     #esi: true
     #fragments: true
 
