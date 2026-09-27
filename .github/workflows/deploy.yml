@@ -67,8 +67,8 @@ jobs:
                     set -e
                     cd /var/www/geocoding
 
-                    echo "${{secrets.ENV_PRODUCTION}}" | base64 -d > .env.production
-                    chmod 600 .env.production
+                    echo "${{secrets.ENV_PRODUCTION}}" | base64 -d > .env
+                    chmod 600 .env
 
                     echo "${{secrets.GITHUB_TOKEN}}" | docker login ghcr.io -u ${{github.actor}} --password-stdin
 
