@@ -35,14 +35,14 @@ final class GeocodingService
 
         $coordinates = $this->geocodingClient->geocode($dto);
 
-        // $this->addressService->create(new CreateAddressDto(
-        //     address: $dto->street,
-        //     city: $dto->city,
-        //     province: $dto->province,
-        //     countrySymbol: $dto->countrySymbol,
-        //     coordinates: $coordinates,
-        //     postalCode: $dto->postalCode,
-        // ));
+        $this->addressService->create(new CreateAddressDto(
+            address: $dto->street,
+            city: $dto->city,
+            province: $dto->province,
+            countrySymbol: $dto->countrySymbol,
+            coordinates: $coordinates,
+            postalCode: $dto->postalCode,
+        ));
 
         return $coordinates;
     }
