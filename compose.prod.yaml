@@ -1,20 +1,22 @@
 services:
     database:
-        image: test
+        image: ghcr.io/alex4270/geocoding-microservice-database:latest
     backend:
-        image: test
+        image: ghcr.io/alex4270/geocoding-microservice:latest
         environment:
             DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=18&charset=utf8"
         restart: unless-stopped
         volumes:
             - ./:/var/www/html:rw
-            - backend-vendor:/var/www/html/vendor
         depends_on:
             - database
         networks:
             - geocoding-microservice-network
-        ports:
-            - 80:80
-
-volumes:
-    backend-vendor:
+        labels:
+            - "traefik.enable=true"
+            - "traefik.docker.network=traefik_proxy"
+            - "traefik.http.routers.geocoding-microservice.rule=Host(`${APP_URL}`)"
+            - "traefik.http.routers.geocoding-microservice.entrypoints=websecure"
+            - "traefik.http.routers.geocoding-microservice.tls=true"
+            - "traefik.http.routers.geocoding-microservice.tls.certResolver=le"
+            - "traefik.http.services.geocoding-microservice.loadbalancer.server.port=80"
