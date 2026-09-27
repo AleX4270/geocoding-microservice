@@ -1,0 +1,46 @@
+name: Test The App Codebase
+
+on:
+    workflow_call:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        name: App Tests Run
+
+        permissions:
+            contents: read
+
+        env:
+            DB_HOST: 127.0.0.1
+
+        services:
+            postgres:
+                image: postgis/postgis:18-3.6
+                env:
+                    POSTGRES_DB: geocoding_microservice_test
+                    POSTGRES_USER: geocoding_microservice_test
+                    POSTGRES_PASSWORD: TsKKMdExVayG
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+                ports: ['5432:5432']
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '8.4'
+                extensions: pdo_pgsql
+
+            - run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+            - run: ./vendor/bin/phpunit
+
+
+
