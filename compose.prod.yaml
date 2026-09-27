@@ -12,6 +12,7 @@ services:
             - database
         networks:
             - geocoding-microservice-network
+            - traefik_proxy
         labels:
             - "traefik.enable=true"
             - "traefik.docker.network=traefik_proxy"
