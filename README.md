@@ -101,7 +101,23 @@ GET /reverse-geocoding?latitude=45.7640&longitude=4.8357
 
 Missing or invalid parameters (e.g. `latitude=abc` or `latitude=100`) result in `422 Unprocessable Content`.
 
+## Testing
 
+The ap code base has approximately ~80% test coverage. These tests are a **mandatory job** included in the production deployment workflows.
+
+In order to execute all tests locally, run:
+
+```bash
+php bin/phpunit
+```
+
+To manually run tests and analyze the current code coverage run:
+
+```bash
+php bin/phpunit --coverage-text
+```
+> **Important**
+> In order to analyze the coverage you need to have code coverage driver installed locally (eg. pcov, xdebug). This project includes the pcov driver in the docker local environment.
 
 ## Deployment
 
