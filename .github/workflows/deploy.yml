@@ -65,7 +65,7 @@ jobs:
                 port: ${{secrets.SSH_PORT}}
                 script: |
                     set -e
-                    cd /var/www/geocoding-microservice
+                    cd /var/www/geocoding
 
                     echo "${{secrets.ENV_PRODUCTION}}" | base64 -d > .env.production
                     chmod 600 .env.production
